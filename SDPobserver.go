@@ -1,23 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
-	bob := "Bob"
-	subscribe(bob)
-	newJob("Senior")
-	sendAll()
-	jim := "Jim"
-	subscribe(jim)
-	sendAll()
-	unsubscribe(jim)
-	sendAll()
+	sub1 := Subscriber{"Bob"}
+	s := Site{[]Subscriber{sub1}, []string{"Flutter Developer", "Java Developer"}}
+	s.newJob("Golang Developer")
 }
 
-var s Site
-
 type Observer interface {
-	react()
+	react(jobs []string)
 }
 
 type Observable interface {
@@ -27,47 +21,50 @@ type Observable interface {
 }
 
 type Site struct {
-	subs []string
+	subs []Subscriber
 	jobs []string
 }
 
-func newJob(v string) {
-	s.jobs = append(s.jobs, v)
-	sendAll()
+type Subscriber struct {
+	name string
 }
 
-func deleteJob(index string) []string {
-	for i, v := range s.jobs {
-		if v == index {
+func (s *Subscriber) react(jobs []string) {
+	fmt.Println("Hi dear", s.name)
+	fmt.Println("Vacancies updated: ")
+	for _, value := range jobs {
+		fmt.Println(value)
+	}
+}
+
+func (s *Site) newJob(v string) {
+	s.jobs = append(s.jobs, v)
+	s.sendAll()
+}
+
+func (s *Site) deleteJob(v string) {
+	for i, value := range s.jobs {
+		if value == v {
 			s.jobs = append(s.jobs[:i], s.jobs[i+1:]...)
 		}
 	}
-	return s.jobs
+	s.sendAll()
 }
 
-func subscribe(v string) {
+func (s *Site) subscribe(v Subscriber) {
 	s.subs = append(s.subs, v)
 }
 
-func unsubscribe(index string) []string {
-	for i, v := range s.subs {
-		if v == index {
+func (s *Site) unsubscribe(v Subscriber) {
+	for i, value := range s.subs {
+		if value == v {
 			s.subs = append(s.subs[:i], s.subs[i+1:]...)
 		}
 	}
-	return s.subs
 }
 
-func sendAll() {
-	for _, value := range s.subs {
-		fmt.Println("Hi dear", value)
-		fmt.Println("Vacancies updated: ")
-		react()
-	}
-}
-
-func react() {
-	for _, value := range s.jobs {
-		fmt.Println(value)
+func (s *Site) sendAll() {
+	for index := range s.subs {
+		s.subs[index].react(s.jobs)
 	}
 }
